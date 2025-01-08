@@ -1,0 +1,48 @@
+{
+  "chemical_name": "",
+  "cas_number": "68-12-2",
+  "storage_handling": {
+    "storage": {},
+    "handling": {}
+  },
+  "ppe": {
+    "eye_protection": {},
+    "hand_protection": {},
+    "body_protection": "",
+    "respiratory": {}
+  },
+  "fire_safety": {
+    "suitable_extinguishers": [],
+    "unsuitable_extinguishers": "",
+    "firefighter_protection": "",
+    "special_precautions": ""
+  },
+  "chemical_properties": {
+    "flammability": {
+      "explosive_range": {},
+      "flash_point": "",
+      "storage_note": ""
+    },
+    "stability_reactivity": {
+      "stability": "",
+      "conditions_to_avoid": [],
+      "incompatible_materials": [],
+      "decomposition": ""
+    }
+  },
+  "emergency_response": {
+    "first_aid": {},
+    "toxicity": {
+      "acute": {},
+      "chronic_effects": ""
+    }
+  },
+  "transportation": {
+    "un_number": "",
+    "proper_shipping_name": "",
+    "hazard_class": "",
+    "packing_group": "",
+    "environmental_hazards": false,
+    "special_precautions": ""
+  }
+}

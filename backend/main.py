@@ -4,6 +4,8 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 import logging  # Import logging module
+import requests
+from bs4 import BeautifulSoup
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -90,18 +92,134 @@ chemicals = [
 
 
 
+
+{
+  "chemical_name": "Diethyl Ether",
+  "cas_number": "60-29-7",
+  "storage_handling": {
+    "storage": {
+      "temperature": "-40°C (below flash point)",
+      "conditions": "Keep container tightly closed in a dry and well-ventilated place",
+      "special_monitoring": "Test for peroxide formation periodically and before distillation",
+      "ignition_sources": "Keep away from heat and sources of ignition",
+      "storage_class": "TRGS 510: 3 (Flammable liquids)"
+    },
+    "handling": {
+      "workspace": "Work under hood",
+      "exposure": "Do not inhale substance/mixture",
+      "aerosols": "Avoid generation of vapours/aerosols",
+      "hygiene": "Change contaminated clothing, wash hands after use",
+      "spill_control": "Use Chemizorb® for spills"
+    }
+  },
+  "ppe": {
+    "eye_protection": {
+      "type": "Safety glasses",
+      "standard": "EN 166"
+    },
+    "hand_protection": {
+      "material": "Viton®",
+      "thickness": "0.7 mm",
+      "breakthrough_time": "30 min"
+    },
+    "body_protection": "Flame retardant antistatic protective clothing",
+    "respiratory": "Filter type AX recommended"
+  },
+  "fire_safety": {
+    "suitable_extinguishers": [
+      "Carbon dioxide (CO2)",
+      "Foam",
+      "Dry powder"
+    ],
+    "unsuitable_extinguishers": "No limitations specified",
+    "firefighter_protection": "Self-contained breathing apparatus required",
+    "special_precautions": "Remove container from danger zone and cool with water"
+  },
+  "chemical_properties": {
+    "flammability": {
+      "explosive_range": {
+        "lower": "1.7%",
+        "upper": "36%"
+      },
+      "flash_point": "-40°C",
+      "storage_note": "Extremely flammable at normal storage conditions"
+    },
+    "stability_reactivity": {
+      "stability": "Stable under standard conditions",
+      "stabilizer": {
+        "name": "butyl hydroxytoluene (BHT)",
+        "concentration": "1 ppm"
+      },
+      "conditions_to_avoid": [
+        "Light",
+        "Heat",
+        "Air",
+        "Moisture"
+      ],
+      "incompatible_materials": [
+        "Rubber",
+        "Various plastics"
+      ],
+      "decomposition": "Forms peroxides"
+    }
+  },
+  "emergency_response": {
+    "first_aid": {
+      "general": "Show safety data sheet to doctor",
+      "inhalation": "Fresh air; call physician",
+      "skin_contact": "Remove contaminated clothing; rinse with water",
+      "eye_contact": "Rinse with plenty of water; remove contacts",
+      "ingestion": "Make victim drink water (max 2 glasses); consult physician"
+    },
+    "toxicity": {
+      "acute": {
+        "lc50_inhalation": {
+          "value": "97.5 mg/l",
+          "species": "Mouse",
+          "duration": "4h"
+        },
+        "ld50_oral": {
+          "value": "1,211 mg/kg",
+          "species": "Rat"
+        },
+        "ld50_dermal": {
+          "value": ">20,000 mg/kg",
+          "species": "Rabbit"
+        }
+      },
+      "chronic_effects": "May cause drowsiness/dizziness; affects central nervous system"
+    }
+  },
+  "transportation": {
+    "un_number": "1155",
+    "proper_shipping_name": "DIETHYL ETHER",
+    "hazard_class": "3",
+    "packing_group": "I",
+    "special_precautions": "Tunnel restriction code (D/E)"
+  }
+}
+
+
+
+
 app = FastAPI()
 
-
+# Updated CORS middleware configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://10.42.241.137:8081","http://192.168.124.61:8081","http://localhost:8081"],  # Add your frontend URL
+    allow_origins=["http://10.17.18.109:8080", "http://localhost:8080"],  # Removed trailing slash
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
+# app.add_middleware(
+    # CORSMiddleware,
+    # allow_origins=["*"],  # Allow all origins (development only!)
+    # allow_credentials=True,
+    # allow_methods=["*"],
+    # allow_headers=["*"],
+# )
 
 @app.get("/")
 async def read_root():
@@ -122,7 +240,68 @@ async def search_chemical(name_or_CAS: str = Query(None, description="Name of th
             })
     logger.info(f"Search results for '{name_or_CAS}': {results}")  # Log the search results
     return results if results else {"error": "No chemical found matching the criteria"}
-  
+
+
+@app.get("/search_2")
+async def search_2chemical(name_or_CAS: str = Query(None, description="Name of the chemical")):
+    if not name_or_CAS:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Please provide a chemical name or CAS number"}
+        )
+
+    url = f"https://www.fishersci.com/us/en/catalog/search/sds?selectLang=EN&store=&msdsKeyword={name_or_CAS}"
+    
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
+    }
+    
+    try:
+        response = requests.get(url, headers=headers, timeout=10)  # Added timeout
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.text, "html.parser")
+        products = soup.find_all("tr", class_="product")
+        
+        results = []
+        for product in products:
+            name_cell = product.find("td", {"data-title": "Product Name"}) or product.find("td", class_="name")
+            desc_cell = product.find("td", {"data-title": "Product Description"}) or product.find("td", class_="description")
+            
+            product_info = {
+                "name": name_cell.text.strip() if name_cell else "N/A",
+                "description": desc_cell.text.strip() if desc_cell else "N/A",
+                "download_links": []
+            }
+            
+            links = product.find_all("a", class_="catalog_num_link")
+            for link in links:
+                href = link.get("href")
+                if href:
+                    full_link = f"https://www.fishersci.com{href}"
+                    product_info["download_links"].append(full_link)
+            
+            results.append(product_info)
+        
+        logger.info(f"Fisher Scientific search results for '{name_or_CAS}': {len(results)} products found")
+        return {"status": "success", "results": results} if results else {"status": "error", "message": "No products found"}
+        
+    except requests.Timeout:
+        logger.error(f"Timeout while searching Fisher Scientific for '{name_or_CAS}'")
+        return JSONResponse(
+            status_code=504,
+            content={"status": "error", "message": "Request timed out"}
+        )
+    except requests.RequestException as e:
+        logger.error(f"Error searching Fisher Scientific: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "message": f"Failed to fetch data: {str(e)}"}
+        )
+
+
+
+
 
 
 
