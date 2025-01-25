@@ -6,6 +6,11 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging  # Import logging module
 import requests
 from bs4 import BeautifulSoup
+import socket
+import uvicorn
+import json
+from pathlib import Path
+from fishersci_search import fishersci_search
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -86,118 +91,105 @@ chemicals = [
             "Wear self-contained breathing apparatus during firefighting.",
             "Remove the container from the danger zone and cool with water."
         ]
+    },
+    
+    {
+        "Chemical Name": "Diethyl ether",
+        "CAS Number": "60-29-7",
+        "Synonyms": ["Ether" ,"Ethyl ether","DEE"],
+        
+        "Storage": {
+            "Flash Point": "-40 °C",
+            "Storage Conditions": "Keep the container tightly closed in a dry and well-ventilated place.",
+            "Source of Ignition Precautions": "Keep away from heat and sources of ignition.",
+            "Precautions": "Test for peroxide formation periodically and before distillation.",
+            "Stability": "The product is chemically stable under standard ambient conditions (room temperature)."
+        },
+        "Handling": {
+            "Safe Handling": "Work under a hood. Do not inhale the substance/mixture. Avoid generating vapors/aerosols.",
+            "Hygiene Measures": "Change contaminated clothing. Preventive skin protection is recommended. Wash hands after working with the substance.",
+            "Precautions": [
+            "Keep away from heat, hot surfaces, sparks, open flames, and other ignition sources. No smoking.",
+            "Keep the container tightly closed.",
+            "Ground and bond container and receiving equipment.",
+            "Use explosion-proof electrical/ventilating/lighting equipment."
+            ],
+            "Spill Protection": "Use liquid-absorbent material such as Chemizorb® to manage spills.",
+            "Protection Against Fire and Explosion": "Keep away from open flames, hot surfaces, and sources of ignition. Take precautionary measures against static discharge."
+        },
+        "Personal Protective Equipment": {
+            "Eye/Face Protection": "Use safety glasses tested and approved under appropriate standards such as NIOSH (US) or EN 166 (EU).",
+            "Skin Protection": {
+            "Material": "Viton®",
+            "Minimum Layer Thickness": "0.7 mm"
+            },
+            "Body Protection": "Flame-retardant antistatic protective clothing.",
+            "Respiratory Protection": "Filter type AX is recommended when vapors or aerosols are generated."
+        },
+        "Fire Extinguisher": {
+            "Fire Extinguisher to be Used": ["Carbon dioxide (CO₂)", "Foam", "Dry powder"],
+            "Precautions for Firefighters": "In the event of a fire, wear self-contained breathing apparatus.",
+            "Specific Precautions": "Remove the container from the danger zone and cool with water. Prevent fire extinguishing water from contaminating surface water or the groundwater system.",
+            "Fire Extinguisher Never to be Used": "No limitations on extinguishing agents are specified for this substance."
+        },
+        "Flammability": {
+            "Flammable/Explosive Concentration": "The chemical is flammable/explosive in the concentration 1.7% (LFL) to 36% (UFL).",
+            "Flash Point and Flammability": {
+            "Flash Point": "-40 °C",
+            "Flammability at Storage Temperature": "If the given storage temperature is above -40 °C (as storage typically occurs at room temperature or above), the chemical is flammable under these conditions."
+            }
+        },
+        "Reactivity and Stability": {
+            "Stability": "The product is chemically stable under standard ambient conditions (room temperature). Contains stabilizer(s): butyl hydroxytoluene (BHT) at 1 ppm.",
+            "Reactivity": "Formation of peroxides is possible. Vapors may form explosive mixtures with air.",
+            "Conditions to Avoid": ["Light", "Heat", "Air", "Warming", "Moisture"],
+            "Incompatible Materials": [
+            "Rubber",
+            "Various plastics",
+            "Strong oxidizing agents",
+            "Halogens",
+            "Peroxides",
+            "Azides",
+            "Perchloric acid"
+            ],
+            "Decomposition Products": "Peroxides are formed as decomposition products. In the event of fire, carbon oxides may also form."
+        },
+        "First Aid Measures": {
+            "General": "Show the material safety data sheet to the doctor in attendance.",
+            "Inhalation": "Move the person to fresh air and call a physician.",
+            "Skin Contact": "Remove all contaminated clothing immediately. Rinse skin with water or take a shower.",
+            "Eye Contact": "Rinse the affected eyes with plenty of water. Remove contact lenses if present.",
+            "Ingestion": "Immediately make the victim drink water (two glasses at most) and consult a physician."
+        },
+        "Toxic Release Measures": {
+            "Acute Toxicity": {
+            "LC50": {
+                "Value": "97.5 mg/L",
+                "Method": "Inhalation",
+                "Species": "Mouse",
+                "Duration": "4 hours"
+            },
+            "LC50 Matrix Assessment": "Moderate to high acute toxicity.",
+            "LD50": {
+                "Value": "1,211 mg/kg",
+                "Method": "Oral",
+                "Species": "Rat"
+            },
+            "LD50 Matrix Assessment": "Moderate acute toxicity."
+            },
+            "Chronic Toxicity": {
+            "Germ Cell Mutagenicity": "Negative results were observed in micronucleus tests and mammalian cell gene mutation tests, indicating no mutagenic potential.",
+            "Carcinogenicity": "No data available.",
+            "Reproductive Toxicity": "No data available.",
+            "Specific Target Organ Toxicity (Repeated Exposure)": "Data on repeated exposure toxicity is not conclusive; however, no chronic toxicity effects were emphasized."
+            },
+            "Possible Medical Effects": {
+            "Acute Effects": "May cause drowsiness, dizziness, and irritation to the respiratory tract. Prolonged or repeated skin exposure may lead to dermatitis.",
+            "Chronic Effects": "Long-term exposure data is limited, but no significant effects on germ cells or reproduction have been identified."
+            }
+        }
     }
 ]
-
-
-
-
-
-{
-  "chemical_name": "Diethyl Ether",
-  "cas_number": "60-29-7",
-  "storage_handling": {
-    "storage": {
-      "temperature": "-40°C (below flash point)",
-      "conditions": "Keep container tightly closed in a dry and well-ventilated place",
-      "special_monitoring": "Test for peroxide formation periodically and before distillation",
-      "ignition_sources": "Keep away from heat and sources of ignition",
-      "storage_class": "TRGS 510: 3 (Flammable liquids)"
-    },
-    "handling": {
-      "workspace": "Work under hood",
-      "exposure": "Do not inhale substance/mixture",
-      "aerosols": "Avoid generation of vapours/aerosols",
-      "hygiene": "Change contaminated clothing, wash hands after use",
-      "spill_control": "Use Chemizorb® for spills"
-    }
-  },
-  "ppe": {
-    "eye_protection": {
-      "type": "Safety glasses",
-      "standard": "EN 166"
-    },
-    "hand_protection": {
-      "material": "Viton®",
-      "thickness": "0.7 mm",
-      "breakthrough_time": "30 min"
-    },
-    "body_protection": "Flame retardant antistatic protective clothing",
-    "respiratory": "Filter type AX recommended"
-  },
-  "fire_safety": {
-    "suitable_extinguishers": [
-      "Carbon dioxide (CO2)",
-      "Foam",
-      "Dry powder"
-    ],
-    "unsuitable_extinguishers": "No limitations specified",
-    "firefighter_protection": "Self-contained breathing apparatus required",
-    "special_precautions": "Remove container from danger zone and cool with water"
-  },
-  "chemical_properties": {
-    "flammability": {
-      "explosive_range": {
-        "lower": "1.7%",
-        "upper": "36%"
-      },
-      "flash_point": "-40°C",
-      "storage_note": "Extremely flammable at normal storage conditions"
-    },
-    "stability_reactivity": {
-      "stability": "Stable under standard conditions",
-      "stabilizer": {
-        "name": "butyl hydroxytoluene (BHT)",
-        "concentration": "1 ppm"
-      },
-      "conditions_to_avoid": [
-        "Light",
-        "Heat",
-        "Air",
-        "Moisture"
-      ],
-      "incompatible_materials": [
-        "Rubber",
-        "Various plastics"
-      ],
-      "decomposition": "Forms peroxides"
-    }
-  },
-  "emergency_response": {
-    "first_aid": {
-      "general": "Show safety data sheet to doctor",
-      "inhalation": "Fresh air; call physician",
-      "skin_contact": "Remove contaminated clothing; rinse with water",
-      "eye_contact": "Rinse with plenty of water; remove contacts",
-      "ingestion": "Make victim drink water (max 2 glasses); consult physician"
-    },
-    "toxicity": {
-      "acute": {
-        "lc50_inhalation": {
-          "value": "97.5 mg/l",
-          "species": "Mouse",
-          "duration": "4h"
-        },
-        "ld50_oral": {
-          "value": "1,211 mg/kg",
-          "species": "Rat"
-        },
-        "ld50_dermal": {
-          "value": ">20,000 mg/kg",
-          "species": "Rabbit"
-        }
-      },
-      "chronic_effects": "May cause drowsiness/dizziness; affects central nervous system"
-    }
-  },
-  "transportation": {
-    "un_number": "1155",
-    "proper_shipping_name": "DIETHYL ETHER",
-    "hazard_class": "3",
-    "packing_group": "I",
-    "special_precautions": "Tunnel restriction code (D/E)"
-  }
-}
 
 
 
@@ -207,7 +199,7 @@ app = FastAPI()
 # Updated CORS middleware configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://10.17.18.109:8080", "http://localhost:8080"],  # Removed trailing slash
+    allow_origins=["*"],  # Removed trailing slash
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -242,6 +234,12 @@ async def search_chemical(name_or_CAS: str = Query(None, description="Name of th
     return results if results else {"error": "No chemical found matching the criteria"}
 
 
+# Load the JSON data
+def load_products():
+    json_path = Path(__file__).parent / "db" / "all_products.json"
+    with open(json_path, 'r') as f:
+        return json.load(f)
+
 @app.get("/search_2")
 async def search_2chemical(name_or_CAS: str = Query(None, description="Name of the chemical")):
     if not name_or_CAS:
@@ -249,58 +247,84 @@ async def search_2chemical(name_or_CAS: str = Query(None, description="Name of t
             status_code=400,
             content={"error": "Please provide a chemical name or CAS number"}
         )
-
-    url = f"https://www.fishersci.com/us/en/catalog/search/sds?selectLang=EN&store=&msdsKeyword={name_or_CAS}"
-    
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
-    }
     
     try:
-        response = requests.get(url, headers=headers, timeout=10)  # Added timeout
-        response.raise_for_status()
+        products = load_products()
+        matching_products = []
+        search_term = name_or_CAS.lower()
         
-        soup = BeautifulSoup(response.text, "html.parser")
-        products = soup.find_all("tr", class_="product")
-        
-        results = []
         for product in products:
-            name_cell = product.find("td", {"data-title": "Product Name"}) or product.find("td", class_="name")
-            desc_cell = product.find("td", {"data-title": "Product Description"}) or product.find("td", class_="description")
+            product_name = product.get("Product Name", "").lower()
+            product_desc = product.get("Product Description", "").lower()
             
-            product_info = {
-                "name": name_cell.text.strip() if name_cell else "N/A",
-                "description": desc_cell.text.strip() if desc_cell else "N/A",
-                "download_links": []
-            }
-            
-            links = product.find_all("a", class_="catalog_num_link")
-            for link in links:
-                href = link.get("href")
-                if href:
-                    full_link = f"https://www.fishersci.com{href}"
-                    product_info["download_links"].append(full_link)
-            
-            results.append(product_info)
+            if search_term in product_name or search_term in product_desc:
+                matching_products.append({
+                    "name": product.get("Product Name"),
+                    "description": product.get("Product Description"),
+                    "download_links": product.get("Download Links", [])
+                })
         
-        logger.info(f"Fisher Scientific search results for '{name_or_CAS}': {len(results)} products found")
-        return {"status": "success", "results": results} if results else {"status": "error", "message": "No products found"}
-        
-    except requests.Timeout:
-        logger.error(f"Timeout while searching Fisher Scientific for '{name_or_CAS}'")
-        return JSONResponse(
-            status_code=504,
-            content={"status": "error", "message": "Request timed out"}
-        )
-    except requests.RequestException as e:
-        logger.error(f"Error searching Fisher Scientific: {str(e)}")
+        if matching_products:
+            logger.info(f"Found {len(matching_products)} products matching '{name_or_CAS}'")
+            return {"status": "success", "results": matching_products}
+        else:
+            logger.info(f"No products found matching '{name_or_CAS}'")
+            return {"status": "error", "message": "No products found matching the criteria"}
+            
+    except Exception as e:
+        logger.error(f"Error searching products: {str(e)}")
         return JSONResponse(
             status_code=500,
-            content={"status": "error", "message": f"Failed to fetch data: {str(e)}"}
+            content={"status": "error", "message": f"Failed to search products: {str(e)}"}
         )
 
-
-
+    
+@app.get("/search_3")
+async def search_3chemical(name_or_CAS: str = Query(None, description="Name of the chemical")):
+    if not name_or_CAS:
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Please provide a chemical name or CAS number"}
+        )
+    
+    try:
+        # Add debug logging
+        logger.info(f"Attempting to search Fisher Scientific for: {name_or_CAS}")
+        
+        results = fishersci_search(querry=name_or_CAS)
+        
+        # Add debug logging for results
+        logger.info(f"Search results: {results}")
+        
+        # Check if results is None or empty
+        if not results:
+            logger.warning(f"No results found for query: {name_or_CAS}")
+            return JSONResponse(
+                status_code=200,  # Changed from 404 to 200 since empty results is not an error
+                content={
+                    "status": "success",
+                    "results": [],
+                    "message": f"No products found for '{name_or_CAS}'"
+                }
+            )
+            
+        logger.info(f"Found {len(results)} products from Fisher Scientific matching '{name_or_CAS}'")
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": "success",
+                "results": results
+            }
+        )
+    except Exception as e:
+        logger.error(f"Error searching Fisher Scientific: {str(e)}", exc_info=True)  # Added exc_info for full traceback
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "error",
+                "message": f"Failed to search Fisher Scientific: {str(e)}"
+            }
+        )
 
 
 
@@ -316,6 +340,18 @@ async def get_chemical_details(CAS_number: str = Query(..., description="Name of
     logger.warning(f"Chemical not found for CAS number '{CAS_number}'")  # Log warning if not found
     return JSONResponse(content={"error": "Chemical not found"})  # Return an error message as JSON if not found
 
+
+
+if __name__=="__main__":
+    hostname = socket.gethostname()
+    local_ip = socket.gethostbyname(hostname)
+    port = 8000
+
+    print(f"Server is running at:")
+    print(f"- Local: http://localhost:{port}")
+    print(f"- Network: http://{local_ip}:{port}")
+
+    uvicorn.run(app, host="0.0.0.0", port=port)
 
 
 

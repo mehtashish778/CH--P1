@@ -93,6 +93,7 @@ export default {
     Weather
   },
   data() {
+    
     return {
       isMenuOpen: false,
       expandedInstruction: null,
@@ -123,7 +124,7 @@ export default {
       const CAS_number = this.$route.params.CAS_number;
       console.log("Fetching details for CAS number:", CAS_number);
       try {
-        const response = await axios.get('http://127.0.0.1:8000/chemical', {
+        const response = await axios.get('http://10.17.18.109:8000/chemical', {
           params: { CAS_number: CAS_number }
         });
         console.log("API Response:", response.data);

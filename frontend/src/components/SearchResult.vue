@@ -23,21 +23,14 @@
     <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
     
     <ul v-if="searchResults.length" class="search-results">
-      <li v-for="result in searchResults" :key="result.CAS_Number" class="result-item">
+      <li v-for="result in searchResults" :key="result.name" class="result-item">
         <div class="result-content">
-          <router-link :to="{ path: `/chemical-profile/${result['CAS Number']}` }" class="result-title">
-            <strong>{{ result['Chemical Name'] }}</strong>
-          </router-link>
-          <p><strong>CAS Number:</strong> {{ result["CAS Number"] }}</p>
-          <p><strong>Common Names:</strong> {{ result["Common Names"].join(', ') }}</p>
-        </div>
-        <div class="action-icons">
-          <span class="icon tooltip" @click="viewDetails(result['CAS Number'])" title="View Details">
-            🔍
-          </span>
-          <span class="icon tooltip" @click="addToFavorites(result['CAS Number'])" title="Add to Favorites">
-            ❤️
-          </span>
+          <div class="result-header">
+            <h3 class="result-title">{{ result.name }}</h3>
+          </div>
+          <div class="result-body">
+            <p class="result-description">{{ result.description }}</p>
+          </div>
         </div>
       </li>
     </ul>
@@ -74,15 +67,15 @@ export default {
       this.search_querry = this.$route.params.search_querry;
 
       try {
-        const response = await fetch(`http://127.0.0.1:8000/search?name_or_CAS=${this.search_querry}`);
+        const response = await fetch(`http://10.17.18.109:8000/search_2?name_or_CAS=${this.search_querry}`);
         if (!response.ok) {
           throw new Error('Error fetching search results');
         }
         const data = await response.json();
-        if (data.error) {
-          this.errorMessage = data.error;
+        if (data.status === 'error') {
+          this.errorMessage = data.message;
         } else {
-          this.searchResults = data;
+          this.searchResults = data.results;
         }
       } catch (error) {
         this.errorMessage = error.message;
@@ -98,8 +91,13 @@ export default {
       }
     },
     viewDetails(casNumber) {
-      this.$router.push(`/chemical-profile/${casNumber}`);
+      if (casNumber === '60-29-7') {
+        this.$router.push('/chemical-profile-dee');
+      } else {
+        this.$router.push(`/chemical-profile/${casNumber}`);
+      }
     },
+
     addToFavorites(casNumber) {
       alert(`Added CAS Number ${casNumber} to favorites.`);
     }
@@ -147,23 +145,44 @@ export default {
   background-color: #ffffff;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  margin-bottom: 10px;
-  padding: 15px;
+  margin-bottom: 15px;
+  padding: 20px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.result-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.result-content {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  flex-direction: column;
+  gap: 12px;
+}
+
+.result-header {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
 }
 
 .result-title {
-  font-size: 1.2em;
-  color: #007acc;
-  text-decoration: none;
-  font-weight: bold;
+  font-size: 1.3em;
+  color: #2c3e50;
+  margin: 0;
+  font-weight: 600;
 }
 
-.result-title:hover {
-  text-decoration: underline;
+.result-body {
+  padding-top: 8px;
+}
+
+.result-description {
+  color: #666;
+  line-height: 1.5;
+  margin: 0;
+  font-size: 1rem;
 }
 
 .action-icons {
@@ -249,6 +268,24 @@ export default {
 
 .search-button:hover {
   background-color: #005fa3; /* Darker shade on hover */
+}
+
+.download-links {
+  margin-top: 10px;
+}
+
+.download-links ul {
+  list-style: none;
+  padding-left: 20px;
+}
+
+.download-links a {
+  color: #007acc;
+  text-decoration: none;
+}
+
+.download-links a:hover {
+  text-decoration: underline;
 }
 </style>
 

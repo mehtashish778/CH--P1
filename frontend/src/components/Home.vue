@@ -1,205 +1,86 @@
 <template>
-  <div class="flex flex-col h-screen bg-gray-50">
-    <!-- Main Content -->
-    <main class="flex-grow p-6 mt-20 flex flex-col space-y-6">
-      <!-- Navigation Bar -->
-      <NavBar 
-        :isMenuOpen="isMenuOpen" 
-        :searchQuery="searchQuery" 
-        @update:searchQuery="searchQuery = $event"
-        :performSearch="performSearch" 
-        :toggleMenu="toggleMenu"
-      />
-      
-      <!-- Weather Card Component -->
-      <WeatherCard />
-      
-      <!-- Recently Visited Section -->
-      <section v-if="recentProfiles.length > 0" class="bg-white p-6 rounded-xl shadow-lg flex flex-col space-y-4">
-        <h2 class="text-2xl font-semibold text-gray-900 border-b-2 border-gray-200 pb-3">Recently Visited Chemical Profiles</h2>
-        <ul class="divide-y divide-gray-300">
-          <li 
-            v-for="profile in recentProfiles" 
-            :key="profile['CAS Number']" 
-            class="py-4 flex flex-col md:flex-row justify-between items-start md:items-center"
-          >
-            <div class="mb-2 md:mb-0">
-              <p class="text-lg font-medium text-gray-900">Chemical Name: {{ profile['Chemical Name'] || 'N/A' }}</p>
-              <p class="text-sm text-gray-600">CAS Number: {{ profile['CAS Number'] || 'N/A' }}</p>
-              <p class="text-sm text-gray-600">Synonyms: {{ profile['Synonyms'].join(', ') || 'N/A' }}</p>
-            </div>
-            <router-link 
-              :to="{ path: `/chemical-profile/${profile['CAS Number']}` }" 
-              class="text-blue-600 hover:text-blue-800 font-medium underline"
-            >
-              View Profile
-            </router-link>
-          </li>
-        </ul>
-      </section>
-    </main>
+  <div class="flex flex-col h-screen bg-white">
+    <nav class="bg-white border-gray-200 dark:bg-gray-900">
+      <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+        <a href="https://flowbite.com/" class="flex items-center space-x-3 rtl:space-x-reverse">
+          <img src="@/assets/logo3.png" class="h-20" alt="Logo" />
+          <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">ChemSafe</span>
+        </a>
+        <div class="hidden md:flex items-center md:order-2">
+          <img src="@/assets/iitm_logo.png" class="h-20" alt="IITM Logo" />
+        </div>
+        <button 
+          @click="toggleMenu"
+          data-collapse-toggle="navbar-default" 
+          type="button" 
+          class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" 
+          aria-controls="navbar-default" 
+          :aria-expanded="isMenuOpen"
+        >
+          <span class="sr-only">Open main menu</span>
+          <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
+          </svg>
+        </button>
+        <div 
+          class="hidden w-full md:block md:w-auto" 
+          :class="{ 'block': isMenuOpen }"
+          id="navbar-default"
+        >
+          <ul class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+            <li>
+              <a href="#" class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500" aria-current="page">Home</a>
+            </li>
+            <li>
+              <a href="#" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">About</a>
+            </li>
+            <li>
+              <a href="#" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Resources</a>
+            </li>
+
+          </ul>
+        </div>
+      </div>
+    </nav>
+    
+    <!-- Hero Poster -->
+    <div class="mx-5 my-2">
+      <div class="rounded-lg overflow-hidden max-w-4xl mx-auto px-3">
+        <img src="@/assets/Section_3.png" alt="Hero Poster" class="w-full object-cover" />
+      </div>
+    </div>
+    <div class="bg-gradient-to-b from-[#1a237e]/90 to-[#0d47a1]/90 border-t border-blue-400/30 rounded-t-[2.5rem] w-full h-[65vh] shadow-[0_-10px_50px_rgba(30,64,175,0.25)] p-10">
+      <div class="grid grid-cols-3 gap-4">
+        <router-link to="/safety-now" class="no-underline text-black">
+          <div class="bg-white p-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 text-center h-48 flex items-center justify-center">
+            <h1 class="text-2xl font-semibold">Safety Now</h1>
+          </div>
+        </router-link>
+        <div class="bg-white p-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 text-center h-48 flex items-center justify-center">
+          <div>
+            <h1 class="text-2xl font-semibold">Safety Pro</h1>
+            <h2 class="text-lg font-semibold mt-2">(Upcoming features)</h2>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-lg transition-transform transform hover:scale-105 text-center h-48 flex items-center justify-center">
+          <div>
+            <h1 class="text-2xl font-semibold">Safety Guru</h1>
+            <h2 class="text-lg font-semibold mt-2">(Upcoming features)</h2>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+
 </template>
 
 <script>
-import { useRouter } from 'vue-router';
-import { defineComponent, ref, onMounted } from 'vue';
-import NavBar from './NavBar.vue';
-import WeatherCard from './Weather.vue';
-import { cache } from '../router';
+import { defineComponent } from 'vue';
 
 export default defineComponent({
   name: 'HomePage',
-  components: {
-    NavBar,
-    WeatherCard
-  },
   setup() {
-    const router = useRouter();
-    const isMenuOpen = ref(true);
-    const searchQuery = ref('');
-    const recentProfiles = ref(cache.recentProfiles || []);
-    const areaLocation = ref('');
-    const locationAccessDenied = ref(false);
-    const manualCity = ref(localStorage.getItem('manualCity') || '');
-    const temperature = ref(localStorage.getItem('temperature') ? parseFloat(localStorage.getItem('temperature')) : null);
-    const humidity = ref(localStorage.getItem('humidity') ? parseFloat(localStorage.getItem('humidity')) : null);
-    const errorMessage = ref('');
-    const showModal = ref(false);
-    const showTempModal = ref(false);
-    const manualTemperature = ref(localStorage.getItem('manualTemperature') ? parseFloat(localStorage.getItem('manualTemperature')) : null);
-    const manualHumidity = ref(localStorage.getItem('manualHumidity') ? parseFloat(localStorage.getItem('manualHumidity')) : null);
-    const isAreaLocationOpen = ref(false);
-
-    const toggleMenu = () => {
-      isMenuOpen.value = !isMenuOpen.value;
-    };
-
-    const performSearch = () => {
-      if (searchQuery.value) {
-        router.push({ path: `/search/${searchQuery.value}` });
-      } else {
-        console.log("Please enter a search term");
-      }
-    };
-
-    const fetchWeather = async (city) => {
-      const apiKey = 'e2043ea21ec654dd007b0b3e14f48a12';
-      try {
-        const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`);
-        if (!response.ok) {
-          throw new Error(`Weather data not found for the city: ${city}`);
-        }
-        const data = await response.json();
-        if (data.main) {
-          temperature.value = data.main.temp;
-          errorMessage.value = '';
-        }
-      } catch (error) {
-        console.error(error);
-        errorMessage.value = error.message;
-      }
-    };
-
-    const getLocation = () => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            const { latitude, longitude } = position.coords;
-            areaLocation.value = `Latitude: ${latitude}, Longitude: ${longitude}`;
-            await fetchWeather(`${latitude},${longitude}`);
-            cache.areaLocation = areaLocation.value;
-            locationAccessDenied.value = false;
-          },
-          (error) => {
-            console.error("Error getting location:", error);
-            if (error.code === error.PERMISSION_DENIED) {
-              areaLocation.value = "Location access denied. Please allow location access in your browser settings.";
-            } else if (error.code === error.POSITION_UNAVAILABLE) {
-              areaLocation.value = "Location information is unavailable.";
-            } else if (error.code === error.TIMEOUT) {
-              areaLocation.value = "The request to get user location timed out.";
-            } else {
-              areaLocation.value = "An unknown error occurred.";
-            }
-            locationAccessDenied.value = true;
-          }
-        );
-      } else {
-        areaLocation.value = "Geolocation is not supported by this browser.";
-      }
-    };
-
-    const setManualLocation = async () => {
-      if (manualCity.value) {
-        areaLocation.value = `City: ${manualCity.value}`;
-        await fetchWeather(manualCity.value);
-        cache.areaLocation = areaLocation.value;
-        localStorage.setItem('areaLocation', areaLocation.value);
-        manualCity.value = '';
-      } else {
-        console.log("Please enter a city name");
-      }
-    };
-
-    const setManualWeather = () => {
-      if (manualTemperature.value != null && manualHumidity.value != null) {
-        temperature.value = manualTemperature.value;
-        humidity.value = manualHumidity.value;
-
-        localStorage.setItem('temperature', manualTemperature.value);
-        localStorage.setItem('humidity', manualHumidity.value);
-
-        manualTemperature.value = null;
-        manualHumidity.value = null;
-
-        console.log("Manual weather data saved to localStorage");
-      } else {
-        console.log("Please enter both temperature and humidity values");
-      }
-    };
-
-    onMounted(() => {
-      getLocation();
-
-      const cachedTemperature = localStorage.getItem('temperature');
-      const cachedHumidity = localStorage.getItem('humidity');
-      const cachedAreaLocation = localStorage.getItem('areaLocation');
-      const cachedRecentProfiles = JSON.parse(localStorage.getItem('recentProfiles')) || [];
-
-      if (cachedTemperature !== null) {
-        temperature.value = parseFloat(cachedTemperature);
-      }
-      if (cachedHumidity !== null) {
-        humidity.value = parseFloat(cachedHumidity);
-      }
-      if (cachedAreaLocation) {
-        areaLocation.value = cachedAreaLocation;
-      }
-      recentProfiles.value = cachedRecentProfiles;
-    });
-
-    return {
-      isMenuOpen,
-      searchQuery,
-      toggleMenu,
-      performSearch,
-      recentProfiles,
-      areaLocation,
-      locationAccessDenied,
-      getLocation,
-      manualCity,
-      setManualLocation,
-      errorMessage,
-      showModal,
-      showTempModal,
-      manualTemperature,
-      manualHumidity,
-      setManualWeather,
-      isAreaLocationOpen,
-      temperature,
-      humidity
-    };
+    return {};
   }
 });
 </script>
@@ -207,59 +88,7 @@ export default defineComponent({
 <style>
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #f9fafb;
+  background-color: #ffffff;
   color: #1a202c;
-}
-
-section {
-  margin-top: 20px;
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 16px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-}
-
-h2 {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: #2d3748;
-}
-
-input[type="text"] {
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-input[type="text"]:focus {
-  outline: none;
-  border-color: #3182ce;
-  box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.25);
-}
-
-button {
-  transition: background-color 0.3s, transform 0.2s;
-}
-
-button:hover {
-  transform: translateY(-1px);
-}
-
-.bg-blue-600 {
-  background-color: #2563eb;
-}
-
-.bg-blue-600:hover {
-  background-color: #1d4ed8;
-}
-
-.bg-red-600 {
-  background-color: #dc2626;
-}
-
-.bg-red-600:hover {
-  background-color: #b91c1c;
-}
-
-.text-blue-600:hover {
-  color: #1d4ed8;
 }
 </style>

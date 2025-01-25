@@ -2,10 +2,10 @@
   <div class="search-bar">
     <input
       type="text"
-      v-model="searchQuery"
+      :value="searchQuery"
       :placeholder="placeholder"
       class="flex-1 border border-gray-400 rounded-l-lg p-2 shadow-sm focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition duration-200"
-      @input="debounceSearch"
+      @input="handleInput"
     />
     <button
       class="bg-blue-700 text-white rounded-r-lg px-4 py-2 hover:bg-blue-800 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-600 transition duration-200"
@@ -42,6 +42,10 @@ export default {
     };
   },
   methods: {
+    handleInput(event) {
+      this.$emit('update:searchQuery', event.target.value);
+      this.debounceSearch();
+    },
     debounceSearch() {
       clearTimeout(this.debounceTimer);
       this.debounceTimer = setTimeout(() => {

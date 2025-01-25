@@ -3,6 +3,11 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from './components/Home.vue'
 import ChemicalProfile from './components/ChemicalProfile.vue'
 import SearchResult from './components/SearchResult.vue'
+import ChemicalProfileDEE from './components/ChemicalProfileDEE.vue'
+import Chem_Dee from './components/DEE.vue'
+
+import Safety_Now from './components/Safety_Now.vue'
+
 import { reactive } from 'vue'
 import axios from 'axios'
 
@@ -25,7 +30,7 @@ const saveCacheToLocalStorage = () => {
 // Function to fetch chemical details from the API
 async function fetchChemicalDetails(CAS_number) {
     try {
-        const response = await axios.get('http://127.0.0.1:8000/chemical', {
+        const response = await axios.get('http://10.17.18.109:8000/chemical', {
             params: { CAS_number: CAS_number }
         });
         return response.data;  // Return the fetched chemical details
@@ -38,7 +43,11 @@ async function fetchChemicalDetails(CAS_number) {
 const routes = [
     { path: '/', component: HomePage },
     { path: '/search/:search_querry', component: SearchResult },
-    { path: '/chemical-profile/:CAS_number', component: ChemicalProfile }
+    { path: '/chemical-profile/:CAS_number', component: ChemicalProfile },
+    { path: '/chemical-profile-dee', component: ChemicalProfileDEE},
+    { path: '/safety-now', component:Safety_Now},
+    { path: '/dee', component:Chem_Dee},
+
 ]
 
 const router = createRouter({
